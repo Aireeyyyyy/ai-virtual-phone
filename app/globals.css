@@ -42,3 +42,124 @@
   --font-size-lg: 17px;  --font-size-xl: 20px;
   --font-size-2xl: 24px; --font-size-3xl: 30px;
 }
+
+/* ── Reading: Scroll mode ── */
+.reading-page-stage--scroll {
+  min-height: 100%;
+  padding-bottom: 80px;
+}
+
+/* ── Reading: Simulated page curl ── */
+.reading-page-stage--simulated {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  perspective: 1200px;
+}
+
+.reading-sim-page {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  transform-origin: left center;
+}
+
+.reading-sim-page--under {
+  z-index: 0;
+}
+
+.reading-sim-page--next-under {
+  z-index: 0;
+}
+
+.reading-sim-page--current {
+  z-index: 2;
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+  background: var(--c-page-body-bg, #fff);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.06);
+}
+
+.reading-sim-page--anim-forward {
+  animation: simFlipForward 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.reading-sim-page--anim-backward {
+  animation: simFlipBackward 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes simFlipForward {
+  0% { transform: translateX(0) rotateY(0); }
+  100% { transform: translateX(-100%) rotateY(15deg); }
+}
+
+@keyframes simFlipBackward {
+  0% { transform: translateX(0) rotateY(0); }
+  100% { transform: translateX(100%) rotateY(-15deg); }
+}
+
+.reading-sim-shadow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.reading-sim-shadow--right {
+  right: 0;
+  background: linear-gradient(to left, rgba(0,0,0,0.15), transparent);
+}
+
+.reading-sim-shadow--left {
+  left: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.15), transparent);
+}
+
+/* ── Reading: Book cover edit button ── */
+.reading-list-cover {
+  position: relative;
+}
+
+.reading-list-cover-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.reading-list-cover-edit {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  color: #6b5c4c;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.reading-list-cover:hover .reading-list-cover-edit,
+.reading-list-item:hover .reading-list-cover-edit,
+.reading-list-cover-edit:focus {
+  opacity: 1;
+}
+
+/* Mobile: always show the edit button */
+@media (hover: none) {
+  .reading-list-cover-edit {
+    opacity: 0.7;
+  }
+}

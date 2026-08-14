@@ -56,6 +56,8 @@ export type ReadingInteractionConfig = {
     bilingualTranslationEnabled: boolean;
     collapseBilingualTranslation: boolean;
     bilingualTranslationPrompt: string;
+    /** Page turn mode: paginated (tap/swipe), scroll (vertical scroll), or simulated (realistic page curl) */
+    pageMode?: "paginated" | "scroll" | "simulated";
 };
 
 export const DEFAULT_READING_INTERACTION_CONFIG: ReadingInteractionConfig = {

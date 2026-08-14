@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, Palette } from "lucide-react";
-import { loadBooks, addBook, deleteBook, saveChapters, loadProgress, saveRawFile } from "@/lib/reading-storage";
+import { ChevronLeft, Palette, ImagePlus } from "lucide-react";
+import { loadBooks, addBook, deleteBook, saveChapters, loadProgress, saveRawFile, updateBook } from "@/lib/reading-storage";
 import { decodeTxtArrayBuffer, parseTxtContent, parseEpubFile, PDF_PAGES_PER_CHAPTER } from "@/lib/reading-parser";
 import type { Book, BookChapter } from "@/lib/reading-types";
 import type { ReadingAppearance } from "@/lib/reading-appearance";
@@ -348,6 +348,39 @@ export function ReadingShelf({ onOpenBook, onClose, appearance, backgroundUrl, o
         setBooks(loadBooks());
     };
 
+    const coverInputRef = useRef<HTMLInputElement>(null);
+    const [coverEditBookId, setCoverEditBookId] = useState<string | null>(null);
+
+    const handleCoverClick = (e: React.MouseEvent, bookId: string) => {
+        e.stopPropagation();
+        setCoverEditBookId(bookId);
+        coverInputRef.current?.click();
+    };
+
+    const handleCoverFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file || !coverEditBookId) return;
+        try {
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            const book = books.find(b => b.id === coverEditBookId);
+            if (book) {
+                const updated = { ...book, coverUrl: dataUrl };
+                await updateBook(updated);
+                setBooks(loadBooks());
+            }
+        } catch (err) {
+            console.error("[Reading] Cover change failed:", err);
+        } finally {
+            setCoverEditBookId(null);
+        }
+    };
+
     const formatBadge = (f: string) => f.toUpperCase();
 
     const coverGradients = ["linen", "mist", "graphite", "sage", "cream", "parchment"] as const;
@@ -438,8 +471,22 @@ export function ReadingShelf({ onOpenBook, onClose, appearance, backgroundUrl, o
                             return (
                                 <div key={book.id} className="reading-list-item" onClick={() => onOpenBook(book)}>
                                     <div className={`reading-list-cover reading-list-cover--${gradient} reading-list-cover--${layout}`}>
-                                        <span className="reading-list-cover-author">{book.author || ""}</span>
-                                        <span className="reading-list-cover-title">{book.title}</span>
+                                        {book.coverUrl ? (
+                                            <img src={book.coverUrl} alt="" className="reading-list-cover-img" />
+                                        ) : (
+                                            <>
+                                                <span className="reading-list-cover-author">{book.author || ""}</span>
+                                                <span className="reading-list-cover-title">{book.title}</span>
+                                            </>
+                                        )}
+                                        <button
+                                            type="button"
+                                            className="reading-list-cover-edit"
+                                            onClick={(e) => handleCoverClick(e, book.id)}
+                                            aria-label="修改封面"
+                                        >
+                                            <ImagePlus size={14} strokeWidth={1.7} />
+                                        </button>
                                     </div>
                                     <div className="reading-list-info">
                                         <span className="reading-list-title">{book.title}</span>
@@ -489,6 +536,15 @@ export function ReadingShelf({ onOpenBook, onClose, appearance, backgroundUrl, o
                     onSave={onSaveAppearance}
                 />
             )}
+
+            {/* Hidden file input for cover image selection */}
+            <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCoverFileChange}
+            />
         </div>
     );
 }
