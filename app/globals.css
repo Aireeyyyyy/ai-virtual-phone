@@ -56,10 +56,43 @@
   background: #ffffff !important;
 }
 
-/* ── Reading: Scroll mode ── */
+/* ── Reading: Scroll mode — let content overflow naturally ── */
 .reading-page-stage--scroll {
   min-height: 100%;
+  height: auto !important;
+  overflow: visible !important;
   padding-bottom: 80px;
+}
+.reading-page-stage--scroll .reading-page-surface {
+  height: auto !important;
+  min-height: unset !important;
+  overflow: visible !important;
+}
+.reading-page-stage--scroll .reading-page-content {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* ── Reading: Replace book-flip with plain slide ── */
+.reading-flip-overlay {
+  background: #ffffff !important;
+}
+.reading-flip-overlay--forward {
+  animation: readingSlideOutLeft 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+.reading-flip-overlay--backward {
+  animation: readingSlideOutRight 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+@keyframes readingSlideOutLeft {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(-100%); opacity: 0; }
+}
+@keyframes readingSlideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
+}
+.reading-flip-shadow {
+  display: none !important;
 }
 
 /* ── Reading: Simulated page curl ── */
