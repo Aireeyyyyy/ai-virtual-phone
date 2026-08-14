@@ -931,6 +931,13 @@ export function ReadingViewer({ book, onBack }: Props) {
         }
     };
 
+    const isScrollMode = !isPdf && readingConfig.pageMode === "scroll";
+    const isSimulatedMode = !isPdf && readingConfig.pageMode === "simulated";
+    const [simDragX, setSimDragX] = useState<number | null>(null);
+    const [simDragStartX, setSimDragStartX] = useState(0);
+    const [simAnimating, setSimAnimating] = useState<'forward' | 'backward' | null>(null);
+    const simDragging = useRef(false);
+
     const handleReadingSurfaceClick = (e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLElement | null;
         if (!target) return;
@@ -941,12 +948,39 @@ export function ReadingViewer({ book, onBack }: Props) {
             return;
         }
 
-        if (!isPdf && currentChapter) {
+        if (!isPdf && currentChapter && !isScrollMode) {
             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
             const x = e.clientX - rect.left;
             const w = rect.width;
-            if (x < w * 0.3) { navigateWithFlip('backward'); return; }
-            if (x > w * 0.7) { navigateWithFlip('forward'); return; }
+            if (isSimulatedMode) {
+                if (x < w * 0.3) {
+                    const canBackward = txtPage > 0 || chapterIndex > 0;
+                    if (canBackward) {
+                        setSimAnimating('backward');
+                        setTimeout(() => {
+                            if (txtPage > 0) setTxtPage(p => p - 1);
+                            else goToChapter(chapterIndex - 1, true);
+                            setSimAnimating(null);
+                        }, 300);
+                    }
+                    return;
+                }
+                if (x > w * 0.7) {
+                    const canForward = txtPage < txtTotalPages - 1 || chapterIndex < chapters.length - 1;
+                    if (canForward) {
+                        setSimAnimating('forward');
+                        setTimeout(() => {
+                            if (txtPage < txtTotalPages - 1) setTxtPage(p => p + 1);
+                            else goToChapter(chapterIndex + 1);
+                            setSimAnimating(null);
+                        }, 300);
+                    }
+                    return;
+                }
+            } else {
+                if (x < w * 0.3) { navigateWithFlip('backward'); return; }
+                if (x > w * 0.7) { navigateWithFlip('forward'); return; }
+            }
         }
 
         setImmersive(prev => !prev);
@@ -1532,6 +1566,37 @@ export function ReadingViewer({ book, onBack }: Props) {
         }
     };
 
+    // Simulated page curl handlers
+    const handleSimTouchStart = (e: React.TouchEvent) => {
+        if (simAnimating) return;
+        setSimDragStartX(e.touches[0].clientX);
+        setSimDragX(null);
+        simDragging.current = true;
+    };
+    const handleSimTouchMove = (e: React.TouchEvent) => {
+        if (!simDragging.current || simAnimating) return;
+        const dx = e.touches[0].clientX - simDragStartX;
+        if (Math.abs(dx) > 10) setSimDragX(dx);
+    };
+    const handleSimTouchEnd = () => {
+        if (!simDragging.current) return;
+        simDragging.current = false;
+        const threshold = (scrollRef.current?.clientWidth || 300) * 0.25;
+        if (simDragX !== null && simDragX < -threshold) {
+            const canForward = txtPage < txtTotalPages - 1 || chapterIndex < chapters.length - 1;
+            if (canForward) {
+                setSimAnimating('forward');
+                setTimeout(() => { if (txtPage < txtTotalPages - 1) setTxtPage(p => p + 1); else goToChapter(chapterIndex + 1); setSimAnimating(null); setSimDragX(null); }, 300);
+            } else { setSimDragX(null); }
+        } else if (simDragX !== null && simDragX > threshold) {
+            const canBackward = txtPage > 0 || chapterIndex > 0;
+            if (canBackward) {
+                setSimAnimating('backward');
+                setTimeout(() => { if (txtPage > 0) setTxtPage(p => p - 1); else goToChapter(chapterIndex - 1, true); setSimAnimating(null); setSimDragX(null); }, 300);
+            } else { setSimDragX(null); }
+        } else { setSimDragX(null); }
+    };
+
     const activeReadingMenuMessage = readingMessageMenu
         ? chatMessages.find((msg) => msg.id === readingMessageMenu.messageId) || null
         : null;
@@ -1617,7 +1682,7 @@ export function ReadingViewer({ book, onBack }: Props) {
             {/* Reading content */}
             <div
                 ref={scrollRef}
-                className={`relative flex-1 min-h-0 px-4 pt-1 pb-3 ${isPdf ? "overflow-auto" : "overflow-hidden"}`}
+                className={`relative flex-1 min-h-0 px-4 pt-1 pb-3 ${isPdf || isScrollMode ? "overflow-auto" : "overflow-hidden"}`}
                 data-ui="body"
                 onClick={handleReadingSurfaceClick}
             >
@@ -1659,15 +1724,49 @@ export function ReadingViewer({ book, onBack }: Props) {
                     </div>
                 ) : (
                     <>
-                        <div
-                            className="reading-page-stage"
-                            onTouchStart={handleTouchStart}
-                            onTouchEnd={handleTouchEnd}
-                        >
-                            <div className="reading-page-surface">
-                                {txtPagesReadyForCurrentChapter ? renderTxtPage(txtPage) : null}
+                        {isScrollMode ? (
+                            <div className="reading-page-stage reading-page-stage--scroll">
+                                <div className="reading-page-surface">
+                                    <div className="reading-page-content">
+                                        {currentChapter.paragraphs.map((para, idx) => (
+                                            <div key={idx}>
+                                                <p className="reading-line reading-line-indent">{para}</p>
+                                                {idx < currentChapter.paragraphs.length - 1 && <div className="reading-line-gap" />}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        ) : isSimulatedMode ? (
+                            <div
+                                className="reading-page-stage reading-page-stage--simulated"
+                                onTouchStart={handleSimTouchStart}
+                                onTouchMove={handleSimTouchMove}
+                                onTouchEnd={handleSimTouchEnd}
+                                onTouchCancel={handleSimTouchEnd}
+                            >
+                                <div
+                                    className={`reading-sim-page reading-sim-page--current ${simAnimating ? `reading-sim-page--anim-${simAnimating}` : ''}`}
+                                    style={simDragX !== null && !simAnimating ? { transform: `translateX(${simDragX}px) rotateY(${simDragX * -0.04}deg)`, transition: 'none' } : undefined}
+                                >
+                                    <div className="reading-page-surface">
+                                        {txtPagesReadyForCurrentChapter ? renderTxtPage(txtPage) : null}
+                                    </div>
+                                    {simDragX !== null && simDragX < 0 && <div className="reading-sim-shadow reading-sim-shadow--right" style={{ opacity: Math.min(0.4, Math.abs(simDragX) / 600) }} />}
+                                    {simDragX !== null && simDragX > 0 && <div className="reading-sim-shadow reading-sim-shadow--left" style={{ opacity: Math.min(0.4, Math.abs(simDragX) / 600) }} />}
+                                </div>
+                            </div>
+                        ) : (
+                            <div
+                                className="reading-page-stage"
+                                onTouchStart={handleTouchStart}
+                                onTouchEnd={handleTouchEnd}
+                            >
+                                <div className="reading-page-surface">
+                                    {txtPagesReadyForCurrentChapter ? renderTxtPage(txtPage) : null}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="reading-page-measure" aria-hidden="true">
                             <p ref={txtMeasureLineRef} className="reading-line">测</p>
@@ -1689,7 +1788,7 @@ export function ReadingViewer({ book, onBack }: Props) {
 
             {/* Immersive Page Number */}
             <span className={`reading-immersive-page ${immersive ? 'opacity-35' : 'opacity-0'}`}>
-                {isPdf ? `${pdfCurrentPage}/${pdfTotalPages || "?"}` : `${txtDisplayedPage}/${txtTotalPages}`}
+                {isPdf ? `${pdfCurrentPage}/${pdfTotalPages || "?"}` : isScrollMode ? "" : `${txtDisplayedPage}/${txtTotalPages}`}
             </span>
 
             {/* Bottom bar — mirrors header style */}
@@ -2002,13 +2101,32 @@ export function ReadingViewer({ book, onBack }: Props) {
             )}
             {showReadingSettings && (
                 <ContentDialog
-                    title="阅读双语翻译"
+                    title="阅读设置"
                     confirmLabel="完成"
                     cancelLabel="关闭"
                     onConfirm={() => setShowReadingSettings(false)}
                     onCancel={() => setShowReadingSettings(false)}
                 >
                     <div className="reading-settings-grid">
+                        {!isPdf && (
+                            <div className="reading-settings-inline-note">
+                                <span>翻页模式</span>
+                                <select
+                                    className="ui-input"
+                                    style={{ width: "auto", minWidth: 100 }}
+                                    value={readingConfig.pageMode || "paginated"}
+                                    onChange={(e) => {
+                                        const next = { ...readingConfig, pageMode: e.target.value as "paginated" | "scroll" | "simulated" };
+                                        setReadingConfig(next);
+                                        saveReadingInteractionConfig(next);
+                                    }}
+                                >
+                                    <option value="paginated">点击/滑动翻页</option>
+                                    <option value="simulated">仿真翻页</option>
+                                    <option value="scroll">上下滚动</option>
+                                </select>
+                            </div>
+                        )}
                         <div className="reading-settings-inline-note">
                             <span>启用阅读双语翻译</span>
                             <Toggle

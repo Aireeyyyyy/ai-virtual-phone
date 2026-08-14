@@ -7,6 +7,8 @@ export type Book = {
     format: "txt" | "epub" | "pdf";
     totalChapters: number;
     createdAt: string;
+    /** User-selected cover image stored as data URL */
+    coverUrl?: string;
 };
 
 export type BookChapter = {
