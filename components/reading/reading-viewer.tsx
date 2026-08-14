@@ -1706,15 +1706,23 @@ export function ReadingViewer({ book, onBack }: Props) {
                 ) : (
                     <>
                         {isScrollMode ? (
-                            <div className="reading-page-surface" style={{ height: 'auto', minHeight: 'unset', overflow: 'visible', paddingBottom: 80 }}>
-                                <div className="reading-page-content">
-                                    {currentChapter.paragraphs.map((para, paraIdx) => {
-                                        const segments = para.split("\n");
-                                        return segments.map((seg, segIdx) => (
-                                            <p key={`${paraIdx}-${segIdx}`} className={`reading-line${segIdx === 0 ? " reading-line-indent" : ""}${segIdx === segments.length - 1 ? " reading-line-seg-end" : ""}`} style={{ whiteSpace: 'normal' }}>{seg}</p>
-                                        ));
-                                    })}
-                                </div>
+                            <div style={{ paddingBottom: 80 }}>
+                                {currentChapter.paragraphs.map((para, paraIdx) => (
+                                    <p
+                                        key={paraIdx}
+                                        style={{
+                                            fontFamily: 'var(--reading-font-family)',
+                                            fontSize: 'var(--reading-font-size, 18px)',
+                                            lineHeight: 'var(--reading-line-height, 2)',
+                                            color: 'var(--reading-text-color, #111)',
+                                            margin: 0,
+                                            marginBottom: 'calc(var(--reading-font-size, 18px) * 0.5)',
+                                            textIndent: '2em',
+                                            wordBreak: 'break-word',
+                                            overflowWrap: 'break-word',
+                                        }}
+                                    >{para}</p>
+                                ))}
                             </div>
                         ) : isSimulatedMode ? (
                             <div
