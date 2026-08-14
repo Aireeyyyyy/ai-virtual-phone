@@ -266,6 +266,7 @@ export function ReadingViewer({ book, onBack }: Props) {
     const [txtLayoutVersion, setTxtLayoutVersion] = useState(0);
     const [txtPages, setTxtPages] = useState<TxtPageItem[][]>([]);
     const [flipAnim, setFlipAnim] = useState<{ direction: 'forward' | 'backward'; items: TxtPageItem[] } | null>(null);
+    const [slideDir, setSlideDir] = useState<'forward' | 'backward' | null>(null);
 
     const [enrichedContacts, setEnrichedContacts] = useState<(ReturnType<typeof loadChatContacts>[number] & { char: Character })[]>([]);
 
@@ -1485,15 +1486,18 @@ export function ReadingViewer({ book, onBack }: Props) {
         if (direction === 'forward' && !canForward) return;
         if (direction === 'backward' && !canBackward) return;
 
-        setFlipAnim({ direction, items: currentItems });
-
-        if (direction === 'forward') {
-            if (txtPage < txtTotalPages - 1) setTxtPage(p => p + 1);
-            else goToChapter(chapterIndex + 1);
-        } else {
-            if (txtPage > 0) setTxtPage(p => p - 1);
-            else goToChapter(chapterIndex - 1, true);
-        }
+        // Use slide animation instead of book-flip overlay
+        setSlideDir(direction);
+        setTimeout(() => {
+            if (direction === 'forward') {
+                if (txtPage < txtTotalPages - 1) setTxtPage(p => p + 1);
+                else goToChapter(chapterIndex + 1);
+            } else {
+                if (txtPage > 0) setTxtPage(p => p - 1);
+                else goToChapter(chapterIndex - 1, true);
+            }
+            setSlideDir(null);
+        }, 220);
     }, [flipAnim, isPdf, txtPages, txtPage, txtTotalPages, chapterIndex, chapters.length]);
 
     const txtDisplayedPage = Math.min(txtPage + 1, txtTotalPages);
@@ -1595,20 +1599,7 @@ export function ReadingViewer({ book, onBack }: Props) {
 
     return (
         <div className="reading-app-surface absolute inset-0 z-[100] flex flex-col bg-[var(--c-page-body-bg)]" data-immersive={immersive} style={{ paddingTop: "var(--page-header-safe-top, 48px)" }}>
-            {/* Page flip overlay */}
-            {flipAnim && (
-                <>
-                    <div
-                        className={`reading-flip-overlay reading-flip-overlay--${flipAnim.direction}`}
-                        onAnimationEnd={() => setFlipAnim(null)}
-                    >
-                        <div className="reading-flip-overlay-body">
-                            {renderStaticPage(flipAnim.items)}
-                        </div>
-                    </div>
-                    <div className={`reading-flip-shadow reading-flip-shadow--${flipAnim.direction}`} />
-                </>
-            )}
+            {/* Page flip overlay — disabled, using slide animation instead */}
 
             {/* Header — chapter name + page info */}
             <header className={`reading-header ${immersive ? "reading-header--immersive" : "reading-header--revealed"}`} data-ui="header">
@@ -1717,17 +1708,13 @@ export function ReadingViewer({ book, onBack }: Props) {
                 ) : (
                     <>
                         {isScrollMode ? (
-                            <div className="reading-page-stage reading-page-stage--scroll">
-                                <div className="reading-page-surface">
-                                    <div className="reading-page-content">
-                                        {currentChapter.paragraphs.map((para, idx) => (
-                                            <div key={idx}>
-                                                <p className="reading-line reading-line-indent">{para}</p>
-                                                {idx < currentChapter.paragraphs.length - 1 && <div className="reading-line-gap" />}
-                                            </div>
-                                        ))}
+                            <div style={{ paddingBottom: 80 }}>
+                                {currentChapter.paragraphs.map((para, idx) => (
+                                    <div key={idx}>
+                                        <p className="reading-line reading-line-indent">{para}</p>
+                                        {idx < currentChapter.paragraphs.length - 1 && <div className="reading-line-gap" />}
                                     </div>
-                                </div>
+                                ))}
                             </div>
                         ) : isSimulatedMode ? (
                             <div
@@ -1757,8 +1744,14 @@ export function ReadingViewer({ book, onBack }: Props) {
                                 className="reading-page-stage"
                                 onTouchStart={handleTouchStart}
                                 onTouchEnd={handleTouchEnd}
+                                style={{ overflow: 'hidden', position: 'relative', height: '100%' }}
                             >
-                                <div className="reading-page-surface">
+                                <div
+                                    className="reading-page-surface"
+                                    style={slideDir ? {
+                                        animation: `readingSlide${slideDir === 'forward' ? 'Left' : 'Right'} 0.22s cubic-bezier(0.4,0,0.2,1) forwards`
+                                    } : undefined}
+                                >
                                     {txtPagesReadyForCurrentChapter ? renderTxtPage(txtPage) : null}
                                 </div>
                             </div>

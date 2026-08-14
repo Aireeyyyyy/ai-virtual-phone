@@ -73,26 +73,14 @@
   overflow: visible !important;
 }
 
-/* ── Reading: Replace book-flip with plain slide ── */
-.reading-flip-overlay {
-  background: #ffffff !important;
-}
-.reading-flip-overlay--forward {
-  animation: readingSlideOutLeft 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-}
-.reading-flip-overlay--backward {
-  animation: readingSlideOutRight 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-}
-@keyframes readingSlideOutLeft {
+/* ── Reading: Slide page turn animations ── */
+@keyframes readingSlideLeft {
   from { transform: translateX(0); opacity: 1; }
-  to   { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(-30px); opacity: 0; }
 }
-@keyframes readingSlideOutRight {
+@keyframes readingSlideRight {
   from { transform: translateX(0); opacity: 1; }
-  to   { transform: translateX(100%); opacity: 0; }
-}
-.reading-flip-shadow {
-  display: none !important;
+  to   { transform: translateX(30px); opacity: 0; }
 }
 
 /* ── Reading: Simulated page curl ── */
