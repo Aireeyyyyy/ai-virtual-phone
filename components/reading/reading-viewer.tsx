@@ -957,11 +957,7 @@ export function ReadingViewer({ book, onBack }: Props) {
                     const canBackward = txtPage > 0 || chapterIndex > 0;
                     if (canBackward) {
                         setSimAnimating('backward');
-                        setTimeout(() => {
-                            if (txtPage > 0) setTxtPage(p => p - 1);
-                            else goToChapter(chapterIndex - 1, true);
-                            setSimAnimating(null);
-                        }, 300);
+                        setTimeout(() => { if (txtPage > 0) setTxtPage(p => p - 1); else goToChapter(chapterIndex - 1, true); setSimAnimating(null); }, 300);
                     }
                     return;
                 }
@@ -969,11 +965,7 @@ export function ReadingViewer({ book, onBack }: Props) {
                     const canForward = txtPage < txtTotalPages - 1 || chapterIndex < chapters.length - 1;
                     if (canForward) {
                         setSimAnimating('forward');
-                        setTimeout(() => {
-                            if (txtPage < txtTotalPages - 1) setTxtPage(p => p + 1);
-                            else goToChapter(chapterIndex + 1);
-                            setSimAnimating(null);
-                        }, 300);
+                        setTimeout(() => { if (txtPage < txtTotalPages - 1) setTxtPage(p => p + 1); else goToChapter(chapterIndex + 1); setSimAnimating(null); }, 300);
                     }
                     return;
                 }
@@ -1746,14 +1738,18 @@ export function ReadingViewer({ book, onBack }: Props) {
                                 onTouchCancel={handleSimTouchEnd}
                             >
                                 <div
-                                    className={`reading-sim-page reading-sim-page--current ${simAnimating ? `reading-sim-page--anim-${simAnimating}` : ''}`}
-                                    style={simDragX !== null && !simAnimating ? { transform: `translateX(${simDragX}px) rotateY(${simDragX * -0.04}deg)`, transition: 'none' } : undefined}
+                                    className={`reading-sim-page reading-sim-page--current${simAnimating ? ` reading-sim-page--anim-${simAnimating}` : ''}`}
+                                    style={simDragX !== null && !simAnimating ? { transform: `translateX(${simDragX}px)`, transition: 'none' } : undefined}
                                 >
                                     <div className="reading-page-surface">
                                         {txtPagesReadyForCurrentChapter ? renderTxtPage(txtPage) : null}
                                     </div>
-                                    {simDragX !== null && simDragX < 0 && <div className="reading-sim-shadow reading-sim-shadow--right" style={{ opacity: Math.min(0.4, Math.abs(simDragX) / 600) }} />}
-                                    {simDragX !== null && simDragX > 0 && <div className="reading-sim-shadow reading-sim-shadow--left" style={{ opacity: Math.min(0.4, Math.abs(simDragX) / 600) }} />}
+                                    {simDragX !== null && simDragX < 0 && (
+                                        <div className="reading-sim-shadow reading-sim-shadow--right" style={{ opacity: Math.min(0.3, Math.abs(simDragX) / 600) }} />
+                                    )}
+                                    {simDragX !== null && simDragX > 0 && (
+                                        <div className="reading-sim-shadow reading-sim-shadow--left" style={{ opacity: Math.min(0.3, Math.abs(simDragX) / 600) }} />
+                                    )}
                                 </div>
                             </div>
                         ) : (
@@ -2121,7 +2117,7 @@ export function ReadingViewer({ book, onBack }: Props) {
                                         saveReadingInteractionConfig(next);
                                     }}
                                 >
-                                    <option value="paginated">点击/滑动翻页</option>
+                                    <option value="paginated">左右滑动翻页</option>
                                     <option value="simulated">仿真翻页</option>
                                     <option value="scroll">上下滚动</option>
                                 </select>

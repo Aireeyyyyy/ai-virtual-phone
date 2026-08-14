@@ -43,6 +43,19 @@
   --font-size-2xl: 24px; --font-size-3xl: 30px;
 }
 
+/* ── Reading: Force pure white background ── */
+.reading-app-surface {
+  background: #ffffff !important;
+}
+.reading-shelf-header,
+.reading-shelf-body,
+.reading-list-item {
+  background: #ffffff !important;
+}
+.reading-footer {
+  background: #ffffff !important;
+}
+
 /* ── Reading: Scroll mode ── */
 .reading-page-stage--scroll {
   min-height: 100%;
@@ -66,7 +79,7 @@
   z-index: 2;
   transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform;
-  background: var(--c-page-body-bg, #fffdf8);
+  background: #ffffff;
   box-shadow: -2px 0 8px rgba(0,0,0,0.06);
 }
 .reading-sim-page--anim-forward {
@@ -92,15 +105,21 @@
 }
 .reading-sim-shadow--right {
   right: 0;
-  background: linear-gradient(to left, rgba(0,0,0,0.15), transparent);
+  background: linear-gradient(to left, rgba(0,0,0,0.08), transparent);
 }
 .reading-sim-shadow--left {
   left: 0;
-  background: linear-gradient(to right, rgba(0,0,0,0.15), transparent);
+  background: linear-gradient(to right, rgba(0,0,0,0.08), transparent);
 }
 
-/* ── Reading: Book cover edit button ── */
-.reading-list-cover { position: relative; }
+/* ── Reading: Book cover — no border/frame, image fills entirely ── */
+.reading-list-cover {
+  position: relative;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
 .reading-list-cover-img {
   position: absolute;
   inset: 0;
@@ -108,6 +127,7 @@
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
+  z-index: 1;
 }
 .reading-list-cover-edit {
   position: absolute;
@@ -123,4 +143,10 @@
   cursor: pointer;
   opacity: 0.7;
   z-index: 2;
+}
+
+/* ── Reading: Remove yellow tape decorations on list items ── */
+.reading-list-item::before,
+.reading-list-item::after {
+  display: none !important;
 }
