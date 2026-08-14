@@ -33,7 +33,7 @@
   /* 输入框底色 */
   --c-input-border: rgba(224, 226, 229, 0);
   /* 输入框边框 */
-  --c-bubble-self: #95EC69;
+  --c-bubble-self: #FFFFFF;
   /* 己方气泡 */
   --c-bubble-other: #FFFFFF;
   /* 对方气泡 */
@@ -53,14 +53,14 @@
   --c-overlay: rgba(0, 0, 0, 0.35);
 
   /* ── 桌面系统图标专属配色（实心） ── */
-  --c-desktop-icon: #ffffff;
-  --c-desktop-icon-bg: #c7b8ff;
-  --c-desktop-icon-box: rgba(255, 255, 255, 0.01);
+  --c-desktop-icon: #1a1a1a;
+  --c-desktop-icon-bg: #ffffff;
+  --c-desktop-icon-box: rgba(0, 0, 0, 0.04);
 
   /* ── 图标色板 9（全部 flat hex） ── */
   --c-icon-blue: #5B8FB966;
   --c-icon-green: #5DA87A66;
-  --c-icon-violet: #7B6BB866;
+  --c-icon-violet: #88888866;
   --c-icon-amber: #C99A4566;
   --c-icon-rose: #BF608066;
   --c-icon-coral: #C8755066;
@@ -262,7 +262,7 @@
   --c-icon: #A0A3A8;
   --c-input: #EBEBEB;
   --c-input-border: #DADBDF;
-  --c-bubble-self: var(--c-action-blue, #246bfd);
+  --c-bubble-self: #FFFFFF;
   --c-bubble-other: #FFFFFF;
   --c-success: #34C759;
   --c-danger: #FF3B30;

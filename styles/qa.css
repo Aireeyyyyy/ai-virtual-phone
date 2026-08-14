@@ -25,10 +25,10 @@
   --qa-text-secondary: #6a685f;
   --qa-text-tertiary: #9a978c;
   --qa-text-inverse: #ffffff;
-  /* Accent：品牌紫 */
-  --qa-accent: #7359e6;
-  --qa-accent-hover: #6246d8;
-  --qa-accent-subtle: rgba(115, 89, 230, 0.12);
+  /* Accent：改为黑色 */
+  --qa-accent: #1a1a1a;
+  --qa-accent-hover: #333333;
+  --qa-accent-subtle: rgba(0, 0, 0, 0.08);
   --qa-danger: #d0564b;
   --success: #4f9e63;
 
