@@ -1486,18 +1486,16 @@ export function ReadingViewer({ book, onBack }: Props) {
         if (direction === 'forward' && !canForward) return;
         if (direction === 'backward' && !canBackward) return;
 
-        // Use slide animation instead of book-flip overlay
+        // Immediately navigate, then trigger slide-in animation on new page
+        if (direction === 'forward') {
+            if (txtPage < txtTotalPages - 1) setTxtPage(p => p + 1);
+            else goToChapter(chapterIndex + 1);
+        } else {
+            if (txtPage > 0) setTxtPage(p => p - 1);
+            else goToChapter(chapterIndex - 1, true);
+        }
         setSlideDir(direction);
-        setTimeout(() => {
-            if (direction === 'forward') {
-                if (txtPage < txtTotalPages - 1) setTxtPage(p => p + 1);
-                else goToChapter(chapterIndex + 1);
-            } else {
-                if (txtPage > 0) setTxtPage(p => p - 1);
-                else goToChapter(chapterIndex - 1, true);
-            }
-            setSlideDir(null);
-        }, 220);
+        setTimeout(() => setSlideDir(null), 260);
     }, [flipAnim, isPdf, txtPages, txtPage, txtTotalPages, chapterIndex, chapters.length]);
 
     const txtDisplayedPage = Math.min(txtPage + 1, txtTotalPages);
@@ -1711,8 +1709,18 @@ export function ReadingViewer({ book, onBack }: Props) {
                             <div style={{ paddingBottom: 80 }}>
                                 {currentChapter.paragraphs.map((para, idx) => (
                                     <div key={idx}>
-                                        <p className="reading-line reading-line-indent">{para}</p>
-                                        {idx < currentChapter.paragraphs.length - 1 && <div className="reading-line-gap" />}
+                                        <p style={{
+                                            fontFamily: 'var(--reading-font-family)',
+                                            fontSize: 'var(--reading-font-size, 18px)',
+                                            lineHeight: 'var(--reading-line-height, 2)',
+                                            color: 'var(--reading-text-color)',
+                                            margin: 0,
+                                            textIndent: '2em',
+                                            wordBreak: 'break-all',
+                                            overflowWrap: 'break-word',
+                                            whiteSpace: 'pre-wrap',
+                                        }}>{para}</p>
+                                        {idx < currentChapter.paragraphs.length - 1 && <div style={{ height: '0.8em' }} />}
                                     </div>
                                 ))}
                             </div>
@@ -1749,7 +1757,7 @@ export function ReadingViewer({ book, onBack }: Props) {
                                 <div
                                     className="reading-page-surface"
                                     style={slideDir ? {
-                                        animation: `readingSlide${slideDir === 'forward' ? 'Left' : 'Right'} 0.22s cubic-bezier(0.4,0,0.2,1) forwards`
+                                        animation: `readingSlideIn${slideDir === 'forward' ? 'Left' : 'Right'} 0.26s cubic-bezier(0.25,0.46,0.45,0.94) both`
                                     } : undefined}
                                 >
                                     {txtPagesReadyForCurrentChapter ? renderTxtPage(txtPage) : null}

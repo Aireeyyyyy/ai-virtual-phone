@@ -73,14 +73,14 @@
   overflow: visible !important;
 }
 
-/* ── Reading: Slide page turn animations ── */
-@keyframes readingSlideLeft {
-  from { transform: translateX(0); opacity: 1; }
-  to   { transform: translateX(-30px); opacity: 0; }
+/* ── Reading: Slide page turn animations (new page slides in) ── */
+@keyframes readingSlideInLeft {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
 }
-@keyframes readingSlideRight {
-  from { transform: translateX(0); opacity: 1; }
-  to   { transform: translateX(30px); opacity: 0; }
+@keyframes readingSlideInRight {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
 }
 
 /* ── Reading: Simulated page curl ── */
