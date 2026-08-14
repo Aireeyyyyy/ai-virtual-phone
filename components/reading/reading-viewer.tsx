@@ -1716,9 +1716,8 @@ export function ReadingViewer({ book, onBack }: Props) {
                                             color: 'var(--reading-text-color)',
                                             margin: 0,
                                             textIndent: '2em',
-                                            wordBreak: 'break-all',
                                             overflowWrap: 'break-word',
-                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-word',
                                         }}>{para}</p>
                                         {idx < currentChapter.paragraphs.length - 1 && <div style={{ height: '0.8em' }} />}
                                     </div>

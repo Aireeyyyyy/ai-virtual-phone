@@ -5298,7 +5298,7 @@ export function ChatRoom({ session, onBack }: ChatRoomProps) {
                                     </div>
                                     {turn.summary.trim() && (
                                         <details className="chat-offline-summary-fold">
-                                            <summary>摘要（{turn.summaryTag || "summary"}）</summary>
+                                            <summary>摘要</summary>
                                             <div className="chat-offline-summary-content">
                                                 <BilingualTextBlock
                                                     text={offlineDisplay.summary}
