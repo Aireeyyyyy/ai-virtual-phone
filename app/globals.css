@@ -43,12 +43,13 @@
   --font-size-2xl: 24px; --font-size-3xl: 30px;
 }
 
-/* ── Chat: Self bubble text color override (bubble is now white, need dark text) ── */
+/* ── Chat: Self bubble — white, no border, dark text (same as other-side bubble) ── */
 [data-ui="bubble-user"] {
   color: #1a1a1a !important;
 }
 .chat-bubble-role-user {
-  border: 1px solid #e8e8e8;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* ── Reading: Force pure white background ── */
